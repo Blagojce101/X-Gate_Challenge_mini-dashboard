@@ -39,6 +39,10 @@ const TicketDetailPage = () => {
     },
   });
 
+  const updateTicketField = (field: Partial<any>) => {
+    mutation.mutate({ ...field, updatedAt: new Date().toISOString() });
+  };
+
   if (isLoading) return <Typography variant="h6">Loading ticket...</Typography>;
 
   if (isError || !ticket)
@@ -130,7 +134,7 @@ const TicketDetailPage = () => {
                   label="Status"
                   size="small"
                   onChange={(e) =>
-                    mutation.mutate({ status: e.target.value as any })
+                    updateTicketField({ status: e.target.value })
                   }>
                   <MenuItem value="open">Open</MenuItem>
                   <MenuItem value="in-progress">In Progress</MenuItem>
@@ -147,7 +151,7 @@ const TicketDetailPage = () => {
                   label="Priority"
                   size="small"
                   onChange={(e) =>
-                    mutation.mutate({ priority: e.target.value as any })
+                    updateTicketField({ priority: e.target.value })
                   }>
                   <MenuItem value="low">Low</MenuItem>
                   <MenuItem value="medium">Medium</MenuItem>
@@ -164,9 +168,7 @@ const TicketDetailPage = () => {
                   label="Assignee"
                   size="small"
                   onChange={(e) =>
-                    mutation.mutate({
-                      assignee: e.target.value || null,
-                    })
+                    updateTicketField({ assignee: e.target.value || null })
                   }>
                   <MenuItem value="">Unassigned</MenuItem>
                   <MenuItem value="Admin User">Admin User</MenuItem>
