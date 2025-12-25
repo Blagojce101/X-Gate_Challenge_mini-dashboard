@@ -39,8 +39,8 @@ A lightweight internal dashboard for support teams to efficiently manage tickets
 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
-cd supportops-mini-dashboard
+git clone https://github.com/Blagojce101/X-Gate_Challenge_mini-dashboard/tree/project
+cd X-Gate_Challenge_mini-dashboard
 ```
 
 2. Install dependencies
