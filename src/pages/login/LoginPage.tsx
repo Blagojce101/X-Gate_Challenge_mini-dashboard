@@ -9,10 +9,11 @@ import {
   Typography,
   Alert,
 } from "@mui/material";
-import { loginUser } from "../../api/authApi";
+import { useAuth } from "../../contexts/AuthContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -23,14 +24,14 @@ const LoginPage = () => {
     setError("");
     setLoading(true);
     try {
-      const { user, token } = await loginUser(email, password);
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      await login(email, password);
       navigate("/app");
     } catch (err) {
-      setError((err as Error).message);
+      if (err instanceof Error) setError(err.message);
+      else setError("An unknown error occurred");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

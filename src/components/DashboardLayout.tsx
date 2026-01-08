@@ -21,7 +21,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
-import type { SafeUser } from "../types/types";
+import { useAuth } from "../contexts/AuthContext";
 import ThemeSwitch from "./ThemeSwitcher";
 
 interface DashboardLayoutProps {
@@ -34,7 +34,7 @@ const drawerWidth = 240;
 const DashboardLayout = ({ themeMode, setThemeMode }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const user: SafeUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -46,8 +46,7 @@ const DashboardLayout = ({ themeMode, setThemeMode }: DashboardLayoutProps) => {
   const handleMenuClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    logout();
     navigate("/login");
     handleMenuClose();
   };

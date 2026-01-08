@@ -55,7 +55,7 @@ const CustomersPage = () => {
       />
 
       <Grid container spacing={3}>
-        {filteredCustomers.map((customer: any) => (
+        {filteredCustomers.map((customer: Customer) => (
           <Grid size={{ xs: 12, sm: 6, md: 4 }} key={customer.id}>
             <CustomerCard customer={customer} />
           </Grid>

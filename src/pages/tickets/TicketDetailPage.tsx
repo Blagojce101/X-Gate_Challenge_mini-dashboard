@@ -11,35 +11,61 @@ import {
   MenuItem,
   Chip,
   Divider,
+  InputAdornment,
+  CircularProgress,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchTicket, updateTicket } from "../../api/ticketsApi";
+import type { Ticket } from "../../types/types";
+import { useState } from "react";
 
 const TicketDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [savingField, setSavingField] = useState<string | null>(null);
 
   const {
     data: ticket,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<Ticket>({
     queryKey: ["ticket", id],
     queryFn: () => fetchTicket(id!),
   });
 
   const mutation = useMutation({
-    mutationFn: (data: Partial<any>) => updateTicket(id!, data),
-    onSuccess: () => {
+    mutationFn: (data: Partial<Ticket>) => updateTicket(id!, data),
+    onMutate: async (newData) => {
+      if (!ticket) return { previousTicket: null };
+
+      await queryClient.cancelQueries({ queryKey: ["ticket", id] });
+
+      const previousTicket = queryClient.getQueryData<Ticket>(["ticket", id]);
+
+      queryClient.setQueryData<Ticket>(["ticket", id], {
+        ...ticket,
+        ...newData,
+      });
+
+      return { previousTicket };
+    },
+    onError: (_err, _newData, context) => {
+      if (context?.previousTicket) {
+        queryClient.setQueryData(["ticket", id], context.previousTicket);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["ticket", id] });
       queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      setSavingField(null);
     },
   });
 
-  const updateTicketField = (field: Partial<any>) => {
+  const updateTicketField = (field: Partial<Ticket>, fieldName: string) => {
+    setSavingField(fieldName);
     mutation.mutate({ ...field, updatedAt: new Date().toISOString() });
   };
 
@@ -56,7 +82,7 @@ const TicketDetailPage = () => {
     );
 
   const getStatusColor = (status: string) => {
-    const colors: Record<string, any> = {
+    const colors: Record<string, "info" | "warning" | "success" | "default"> = {
       open: "info",
       "in-progress": "warning",
       resolved: "success",
@@ -66,7 +92,7 @@ const TicketDetailPage = () => {
   };
 
   const getPriorityColor = (priority: string) => {
-    const colors: Record<string, any> = {
+    const colors: Record<string, "default" | "info" | "warning" | "error"> = {
       low: "default",
       medium: "info",
       high: "warning",
@@ -134,7 +160,14 @@ const TicketDetailPage = () => {
                   label="Status"
                   size="small"
                   onChange={(e) =>
-                    updateTicketField({ status: e.target.value })
+                    updateTicketField({ status: e.target.value }, "status")
+                  }
+                  endAdornment={
+                    savingField === "status" ? (
+                      <InputAdornment position="end" sx={{ mr: 3 }}>
+                        <CircularProgress size={16} thickness={4} />
+                      </InputAdornment>
+                    ) : null
                   }>
                   <MenuItem value="open">Open</MenuItem>
                   <MenuItem value="in-progress">In Progress</MenuItem>
@@ -151,7 +184,14 @@ const TicketDetailPage = () => {
                   label="Priority"
                   size="small"
                   onChange={(e) =>
-                    updateTicketField({ priority: e.target.value })
+                    updateTicketField({ priority: e.target.value }, "priority")
+                  }
+                  endAdornment={
+                    savingField === "priority" ? (
+                      <InputAdornment position="end" sx={{ mr: 3 }}>
+                        <CircularProgress size={16} thickness={4} />
+                      </InputAdornment>
+                    ) : null
                   }>
                   <MenuItem value="low">Low</MenuItem>
                   <MenuItem value="medium">Medium</MenuItem>
@@ -168,7 +208,17 @@ const TicketDetailPage = () => {
                   label="Assignee"
                   size="small"
                   onChange={(e) =>
-                    updateTicketField({ assignee: e.target.value || null })
+                    updateTicketField(
+                      { assignee: e.target.value || null },
+                      "assignee"
+                    )
+                  }
+                  endAdornment={
+                    savingField === "assignee" ? (
+                      <InputAdornment position="end" sx={{ mr: 3 }}>
+                        <CircularProgress size={16} thickness={4} />
+                      </InputAdornment>
+                    ) : null
                   }>
                   <MenuItem value="">Unassigned</MenuItem>
                   <MenuItem value="Admin User">Admin User</MenuItem>

@@ -1,22 +1,20 @@
-import type { User, LoginResponse } from "../types/types";
+import type { LoginResponse } from "../types/types";
 import { API_URL } from "./api";
 
 export async function loginUser(
   email: string,
   password: string
 ): Promise<LoginResponse> {
-  const res = await fetch(`${API_URL}/users`);
-  if (!res.ok) throw new Error("Failed to fetch users");
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
 
-  const users: User[] = await res.json();
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Login failed");
+  }
 
-  const user = users.find((u) => u.email === email && u.password === password);
-  if (!user) throw new Error("Invalid email or password");
-
-  const { password: _, ...safeUser } = user;
-
-  return {
-    user: safeUser,
-    token: `mock-token-${user.id}-${Date.now()}`,
-  };
+  return res.json();
 }
