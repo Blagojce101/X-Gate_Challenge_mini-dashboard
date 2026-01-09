@@ -97,7 +97,11 @@ const TicketsPage = () => {
         data={filteredTickets}
         columns={ticketsColumns}
         initialPageSize={10}
-        onRowClick={(ticket) => navigate(`/app/tickets/${ticket.id}`)}
+        onRowClick={(ticket) =>
+          navigate(`/app/tickets/${ticket.id}`, {
+            state: { from: location.pathname + location.search },
+          })
+        }
       />
     </Box>
   );

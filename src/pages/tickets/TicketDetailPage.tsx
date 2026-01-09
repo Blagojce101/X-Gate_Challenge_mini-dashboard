@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Paper,
@@ -21,11 +21,19 @@ import { fetchTicket, updateTicket } from "../../api/ticketsApi";
 import type { Ticket } from "../../types/types";
 import { useState } from "react";
 
+interface LocationState {
+  from: string;
+}
+
 const TicketDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [savingField, setSavingField] = useState<string | null>(null);
+
+  const locationState = location.state as LocationState;
+  const navigateBack = locationState.from || "/app/tickets";
 
   const {
     data: ticket,
@@ -75,7 +83,7 @@ const TicketDetailPage = () => {
     return (
       <Box>
         <Typography variant="h5">Ticket not found</Typography>
-        <Button onClick={() => navigate("/app/tickets")} sx={{ mt: 2 }}>
+        <Button onClick={() => navigate(navigateBack)} sx={{ mt: 2 }}>
           Back to Tickets
         </Button>
       </Box>
@@ -105,7 +113,7 @@ const TicketDetailPage = () => {
     <Box>
       <Button
         startIcon={<ArrowBackIcon />}
-        onClick={() => navigate("/app/tickets")}
+        onClick={() => navigate(navigateBack)}
         sx={{ mb: 2 }}>
         Back to Tickets
       </Button>
