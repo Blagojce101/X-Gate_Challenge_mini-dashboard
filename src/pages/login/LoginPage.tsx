@@ -8,8 +8,11 @@ import {
   Button,
   Typography,
   Alert,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { useAuth } from "../../contexts/AuthContext";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -18,6 +21,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +37,8 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
+
+  const handleShowPassword = () => setShowPassword((show) => !show);
 
   return (
     <Box
@@ -73,12 +79,27 @@ const LoginPage = () => {
             />
             <TextField
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               fullWidth
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
+              autoComplete="current-password"
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleShowPassword}
+                        edge="end">
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
             />
             <Button
               type="submit"

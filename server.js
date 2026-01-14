@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import crypto from "crypto";
+import swaggerUi from "swagger-ui-express";
+import yaml from "yamljs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,8 +37,21 @@ server.post("/auth/login", (req, res) => {
   res.json({ user: safeUser, token });
 });
 
+const swaggerDocument = yaml.load(path.join(__dirname, "openapi.yaml"));
+
+server.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "Mini Dashboard API",
+    customfavIcon: "/favicon.ico",
+  })
+);
+
 server.use(router);
 
 server.listen(5000, () => {
-  console.log("API running at http://localhost:5000");
+  console.log("JSON Server is running on http://localhost:5000");
+  console.log("Swagger UI available at: http://localhost:5000/api-docs");
 });

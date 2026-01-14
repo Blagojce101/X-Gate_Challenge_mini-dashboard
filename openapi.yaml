@@ -1,0 +1,119 @@
+openapi: 3.0.3
+info:
+  title: Mini Dashboard Support API
+  description: Fake REST API for support dashboard (customers, tickets, auth)
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /auth/login:
+    post:
+      summary: User login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  { type: string, format: email, example: "admin@support.com" }
+                password: { type: string, example: "admin123" }
+      responses:
+        "200":
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: "#/components/schemas/UserSafe" }
+                  token:
+                    {
+                      type: string,
+                      example: "550e8400-e29b-41d4-a716-446655440000",
+                    }
+        "401":
+          description: Invalid credentials
+
+  /customers:
+    get:
+      summary: Get all customers
+      tags: [Customers]
+      responses:
+        "200":
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Customer" }
+
+  /customers/{id}:
+    get:
+      summary: Get customer by ID
+      tags: [Customers]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Customer details
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Customer" }
+
+  /tickets:
+    get:
+      summary: Get all tickets
+      tags: [Tickets]
+      responses:
+        "200":
+          description: List of tickets
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Ticket" }
+
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id: { type: string, example: "1" }
+        name: { type: string }
+        email: { type: string }
+        company: { type: string }
+        phone: { type: string }
+        status: { type: string, enum: [active, inactive] }
+        createdAt: { type: string, format: date-time }
+
+    Ticket:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [open, "in-progress", resolved, closed] }
+        priority: { type: string, enum: [low, medium, high, urgent] }
+        customerId: { type: string }
+        customerName: { type: string }
+        assignee: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    UserSafe:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string }
+        name: { type: string }
+        role: { type: string, enum: [admin, agent] }

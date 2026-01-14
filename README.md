@@ -24,9 +24,9 @@ A lightweight internal dashboard for support teams to efficiently manage tickets
 
 - **Frontend**: React 18, TypeScript, Vite
 - **UI Components**: Material-UI
-- **State Management**: json-server with localStorage persistence
+- **State Management**: React Query for server-state management
 - **Routing**: React Router v6
-- **Data Storage**: Client-side with localStorage
+- **Data Storage**: json-server using a local JSON file (`db.json`)
 
 ## Getting Started
 
@@ -63,13 +63,25 @@ pnpm server
 yarn server
 ```
 
-4. The json-server runs at http://localhost:5000 by default, serving:
+4. The json-server runs at http://localhost:5000 by default.
 
-- `GET /tickets` - fetch all tickets
-- `GET /tickets/:id` - fetch details of a ticket
-- `GET /customers` - fetch all customers
-- `GET /customers/:id` - fetch details of a customer
-- `GET /tickets?customerId=:id` - fetch all tickets for a specific customer
+### API Routes
+
+**Authentication**
+- `POST /auth/login` – authenticate user
+
+**Customers**
+- `GET /customers` – fetch all customers
+- `GET /customers/:id` – fetch customer details
+
+**Tickets**
+- `GET /tickets` – fetch all tickets
+- `GET /tickets/:id` – fetch ticket details
+- `PATCH /tickets/:id` – update ticket fields
+- `GET /tickets?customerId=:id` – fetch tickets for a specific customer
+
+**Documentation**
+- `GET /api-docs` – Swagger / OpenAPI documentation
 
 5. Run the development server
 
@@ -105,10 +117,15 @@ yarn dev
 │   │   ├── customersApi.ts
 │   │   └── ticketsApi.ts
 │   ├── components/
+│   │   ├── Table
+│   │   │   ├── SkeletonTable.tsx
+│   │   │   └── Table.tsx 
 │   │   ├── DashboardLayout.tsx
+│   │   ├── ErrorBoundary.tsx
 │   │   ├── ProtectedRoute.tsx
-│   │   ├── Table.tsx
 │   │   └── ThemeSwitcher.tsx
+│   ├── contexts
+│   │   └── AuthContext.tsx
 │   ├── helpers/
 │   │   └── tableDataHelper.tsx
 │   ├── hooks/
@@ -117,19 +134,22 @@ yarn dev
 │   ├── pages/
 │   │   ├── customers/
 │   │   │   ├── CustomerCard.tsx
-│   │   │   ├── CustomerDetailsPage.tsx
-│   │   │   └── CustomerPage.tsx
+│   │   │   ├── CustomerDetailPage.tsx
+│   │   │   ├── CustomersPage.tsx
+│   │   │   └── SkeletonCustomerCard.tsx
 │   │   ├── login/
 │   │   │   └── LoginPage.tsx
 │   │   ├── tickets/
-│   │   │   ├── TicketsPage.tsx
-│   │   │   └── TicketDetailPage.tsx
+│   │   │   ├── TicketDetailPage.tsx
+│   │   │   └── TicketsPage.tsx
 │   ├── types/
 │   │   └── types.ts
 │   ├── App.tsx
 │   └── main.tsx
 ├── db.json
 ├── index.html
+├── openapi.yaml
+├── server.js
 ├── vite.config.ts
 └── README.md
 ```
@@ -138,7 +158,7 @@ yarn dev
 
 1. **React + Vite**: Fast development with hot module replacement
 2. **Material-UI**: Comprehensive component library with excellent theming
-3. **json-server**: Lightweight state management with persistence
+3. **json-server**: Lightweight mock REST API with file-based persistence
 4. **React Router**: Standard routing for React applications
 5. **TypeScript**: Type safety and better developer experience
 
@@ -154,7 +174,7 @@ yarn dev
 2. **Responsive Design**: Mobile-first approach
 3. **Search & Filters**: Multiple filter combinations for tickets
 4. **Row Click Navigation**: Intuitive navigation from table rows
-5. **Persistent State**: Data persists across page refreshes
+5. **Persistent Data**: Backend data persists via `db.json`; table state is URL-driven
 
 ## License
 

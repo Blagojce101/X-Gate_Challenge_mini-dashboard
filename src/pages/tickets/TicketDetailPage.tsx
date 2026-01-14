@@ -14,16 +14,11 @@ import {
   InputAdornment,
   CircularProgress,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchTicket, updateTicket } from "../../api/ticketsApi";
 import type { Ticket } from "../../types/types";
 import { useState } from "react";
-
-interface LocationState {
-  from: string;
-}
 
 const TicketDetailPage = () => {
   const { id } = useParams();
@@ -32,8 +27,7 @@ const TicketDetailPage = () => {
   const queryClient = useQueryClient();
   const [savingField, setSavingField] = useState<string | null>(null);
 
-  const locationState = location.state as LocationState;
-  const navigateBack = locationState.from || "/app/tickets";
+  const navigateBack = location.state?.from ?? "/app/tickets";
 
   const {
     data: ticket,
@@ -77,16 +71,23 @@ const TicketDetailPage = () => {
     mutation.mutate({ ...field, updatedAt: new Date().toISOString() });
   };
 
-  if (isLoading) return <Typography variant="h6">Loading ticket...</Typography>;
-
-  if (isError || !ticket)
+  if (isError)
     return (
-      <Box>
+      <Grid
+        container
+        sx={{
+          width: "100%",
+          height: "84vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}>
         <Typography variant="h5">Ticket not found</Typography>
         <Button onClick={() => navigate(navigateBack)} sx={{ mt: 2 }}>
           Back to Tickets
         </Button>
-      </Box>
+      </Grid>
     );
 
   const getStatusColor = (status: string) => {
@@ -110,143 +111,158 @@ const TicketDetailPage = () => {
   };
 
   return (
-    <Box>
-      <Button
-        startIcon={<ArrowBackIcon />}
-        onClick={() => navigate(navigateBack)}
-        sx={{ mb: 2 }}>
-        Back to Tickets
-      </Button>
-
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          {ticket.title}
-        </Typography>
-
-        <Box sx={{ mb: 3, display: "flex", gap: 1 }}>
-          <Chip label={`Ticket #${ticket.id}`} />
-          <Chip label={ticket.status} color={getStatusColor(ticket.status)} />
-          <Chip
-            label={ticket.priority}
-            color={getPriorityColor(ticket.priority)}
-          />
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Typography variant="h6" gutterBottom>
-              Description
-            </Typography>
-            <Typography variant="body1" paragraph>
-              {ticket.description}
-            </Typography>
-
-            <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-              Customer Information
-            </Typography>
-            <Typography variant="body2">
-              <strong>Name:</strong> {ticket.customerName}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Customer ID:</strong> {ticket.customerId}
-            </Typography>
-          </Grid>
-
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Paper elevation={2} sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Ticket Details
-              </Typography>
-
-              {/* STATUS */}
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={ticket.status}
-                  label="Status"
-                  size="small"
-                  onChange={(e) =>
-                    updateTicketField({ status: e.target.value }, "status")
-                  }
-                  endAdornment={
-                    savingField === "status" ? (
-                      <InputAdornment position="end" sx={{ mr: 3 }}>
-                        <CircularProgress size={16} thickness={4} />
-                      </InputAdornment>
-                    ) : null
-                  }>
-                  <MenuItem value="open">Open</MenuItem>
-                  <MenuItem value="in-progress">In Progress</MenuItem>
-                  <MenuItem value="resolved">Resolved</MenuItem>
-                  <MenuItem value="closed">Closed</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* PRIORITY */}
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel>Priority</InputLabel>
-                <Select
-                  value={ticket.priority}
-                  label="Priority"
-                  size="small"
-                  onChange={(e) =>
-                    updateTicketField({ priority: e.target.value }, "priority")
-                  }
-                  endAdornment={
-                    savingField === "priority" ? (
-                      <InputAdornment position="end" sx={{ mr: 3 }}>
-                        <CircularProgress size={16} thickness={4} />
-                      </InputAdornment>
-                    ) : null
-                  }>
-                  <MenuItem value="low">Low</MenuItem>
-                  <MenuItem value="medium">Medium</MenuItem>
-                  <MenuItem value="high">High</MenuItem>
-                  <MenuItem value="urgent">Urgent</MenuItem>
-                </Select>
-              </FormControl>
-
-              {/* ASSIGNEE */}
-              <FormControl fullWidth>
-                <InputLabel>Assignee</InputLabel>
-                <Select
-                  value={ticket.assignee || ""}
-                  label="Assignee"
-                  size="small"
-                  onChange={(e) =>
-                    updateTicketField(
-                      { assignee: e.target.value || null },
-                      "assignee"
-                    )
-                  }
-                  endAdornment={
-                    savingField === "assignee" ? (
-                      <InputAdornment position="end" sx={{ mr: 3 }}>
-                        <CircularProgress size={16} thickness={4} />
-                      </InputAdornment>
-                    ) : null
-                  }>
-                  <MenuItem value="">Unassigned</MenuItem>
-                  <MenuItem value="Admin User">Admin User</MenuItem>
-                  <MenuItem value="Support Agent">Support Agent</MenuItem>
-                </Select>
-              </FormControl>
-
-              <Divider sx={{ my: 2 }} />
-
-              <Typography variant="caption" display="block">
-                Created: {new Date(ticket.createdAt).toLocaleString()}
-              </Typography>
-              <Typography variant="caption" display="block">
-                Updated: {new Date(ticket.updatedAt).toLocaleString()}
-              </Typography>
-            </Paper>
-          </Grid>
+    <>
+      {isLoading || !ticket ? (
+        <Grid
+          container
+          sx={{
+            width: "100%",
+            height: "83vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+          <CircularProgress />
         </Grid>
-      </Paper>
-    </Box>
+      ) : (
+        <Box>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h4" gutterBottom>
+              {ticket.title}
+            </Typography>
+
+            <Box sx={{ mb: 3, display: "flex", gap: 1 }}>
+              <Chip label={`Ticket #${ticket.id}`} />
+              <Chip
+                label={ticket.status}
+                color={getStatusColor(ticket.status)}
+              />
+              <Chip
+                label={ticket.priority}
+                color={getPriorityColor(ticket.priority)}
+              />
+            </Box>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, md: 8 }}>
+                <Typography variant="h6" gutterBottom>
+                  Description
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  {ticket.description}
+                </Typography>
+
+                <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+                  Customer Information
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Name:</strong> {ticket.customerName}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Customer ID:</strong> {ticket.customerId}
+                </Typography>
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Ticket Details
+                  </Typography>
+
+                  {/* STATUS */}
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={ticket.status}
+                      label="Status"
+                      size="small"
+                      onChange={(e) =>
+                        updateTicketField({ status: e.target.value }, "status")
+                      }
+                      endAdornment={
+                        savingField === "status" ? (
+                          <InputAdornment position="end" sx={{ mr: 3 }}>
+                            <CircularProgress size={16} thickness={4} />
+                          </InputAdornment>
+                        ) : null
+                      }>
+                      <MenuItem value="open">Open</MenuItem>
+                      <MenuItem value="in-progress">In Progress</MenuItem>
+                      <MenuItem value="resolved">Resolved</MenuItem>
+                      <MenuItem value="closed">Closed</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  {/* PRIORITY */}
+                  <FormControl fullWidth sx={{ mb: 2 }}>
+                    <InputLabel>Priority</InputLabel>
+                    <Select
+                      value={ticket.priority}
+                      label="Priority"
+                      size="small"
+                      onChange={(e) =>
+                        updateTicketField(
+                          { priority: e.target.value },
+                          "priority"
+                        )
+                      }
+                      endAdornment={
+                        savingField === "priority" ? (
+                          <InputAdornment position="end" sx={{ mr: 3 }}>
+                            <CircularProgress size={16} thickness={4} />
+                          </InputAdornment>
+                        ) : null
+                      }>
+                      <MenuItem value="low">Low</MenuItem>
+                      <MenuItem value="medium">Medium</MenuItem>
+                      <MenuItem value="high">High</MenuItem>
+                      <MenuItem value="urgent">Urgent</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  {/* ASSIGNEE */}
+                  <FormControl fullWidth>
+                    <InputLabel>Assignee</InputLabel>
+                    <Select
+                      value={ticket.assignee || ""}
+                      label="Assignee"
+                      size="small"
+                      onChange={(e) =>
+                        updateTicketField(
+                          { assignee: e.target.value || null },
+                          "assignee"
+                        )
+                      }
+                      endAdornment={
+                        savingField === "assignee" ? (
+                          <InputAdornment position="end" sx={{ mr: 3 }}>
+                            <CircularProgress size={16} thickness={4} />
+                          </InputAdornment>
+                        ) : null
+                      }>
+                      <MenuItem value="">Unassigned</MenuItem>
+                      <MenuItem value="Admin User">Admin User</MenuItem>
+                      <MenuItem value="Support Agent">Support Agent</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Typography variant="caption" display="block">
+                    Created: {new Date(ticket.createdAt).toLocaleString()}
+                  </Typography>
+                  <Typography variant="caption" display="block">
+                    Updated: {new Date(ticket.updatedAt).toLocaleString()}
+                  </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Box>
+      )}
+    </>
   );
 };
 
